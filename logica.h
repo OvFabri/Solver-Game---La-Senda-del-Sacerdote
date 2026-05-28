@@ -1,8 +1,4 @@
 #pragma once
-// ============================================================
-//  logica.h — La Senda del Sacerdote
-//  Logica compartida entre el juego y el solver
-// ============================================================
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -11,20 +7,11 @@
 #include <iostream>
 #include <iomanip>
 
-// ============================================================
-//  CONSTANTES
-// ============================================================
 const int APRENDIZ = 0;
 const int AH_PUCH  = 99;
 
-// ============================================================
-//  TIPO PRINCIPAL
-// ============================================================
 using Senda = std::vector<int>;   // vector de valores de cartas
 
-// ============================================================
-//  INFO DE CARTAS
-// ============================================================
 inline bool esMaestro(int v) {
     return v==5||v==7||v==8||v==9||v==10||v==12||v==13||v==14;
 }
@@ -53,9 +40,6 @@ inline std::string nombreCarta(int v) {
     }
 }
 
-// ============================================================
-//  COLORES ANSI
-// ============================================================
 const std::string C_MAESTRO  = "\033[32m";
 const std::string C_FALSO    = "\033[31m";
 const std::string C_APRENDIZ = "\033[36m";
@@ -64,9 +48,7 @@ const std::string C_AMARILLO = "\033[33m";
 const std::string C_NEGRITA  = "\033[1m";
 const std::string C_RESET    = "\033[0m";
 
-// ============================================================
-//  OPERACIONES SOBRE SENDA
-// ============================================================
+
 inline bool victoria(const Senda& s) {
     int ia=-1, ip=-1;
     for(int i=0;i<(int)s.size();i++){
@@ -120,10 +102,6 @@ inline int adyMenorValor(const Senda& s, int pos) {
     return mejor;
 }
 
-// ============================================================
-//  SIMULAR TURNO FALSOS MAESTROS
-//  Retorna senda vacía si el Aprendiz fue destruido (derrota)
-// ============================================================
 inline Senda simularFalsosMaestros(Senda s) {
     for(int fm:{1,2,3,4,6,11}){
         int pos=buscar(s,fm);
@@ -172,18 +150,12 @@ inline Senda simularFalsosMaestros(Senda s) {
     return s;
 }
 
-// ============================================================
-//  JUGADA (descripcion de un movimiento del jugador)
-// ============================================================
 struct Jugada {
     int  maestro=0, posMaestro=0, opcion=0, target=0;
     char dir='+';
     std::string descripcion;
 };
 
-// ============================================================
-//  GENERAR TODOS LOS MOVIMIENTOS POSIBLES DEL JUGADOR
-// ============================================================
 inline std::vector<std::pair<Senda,Jugada>> generarMovimientos(const Senda& s) {
     std::vector<std::pair<Senda,Jugada>> res;
     int n=(int)s.size();
@@ -281,9 +253,7 @@ inline std::vector<std::pair<Senda,Jugada>> generarMovimientos(const Senda& s) {
     return res;
 }
 
-// ============================================================
-//  IMPRIMIR SENDA (version compacta horizontal)
-// ============================================================
+//  IMPRIMIR SENDA
 inline void imprimirSendaH(const Senda& s) {
     std::cout << "  [";
     for(int i=0;i<(int)s.size();i++){
@@ -297,27 +267,18 @@ inline void imprimirSendaH(const Senda& s) {
     std::cout<<"]\n";
 }
 
-// ============================================================
 //  NODO INTERNO DEL BFS
-// ============================================================
 struct NodoBFS {
     Senda senda;
     std::vector<Jugada> camino;
 };
 
-// ============================================================
-//  CLAVE DE ESTADO (para memoizacion)
-// ============================================================
 inline std::string claveEstado(const Senda& s){
     std::string k; k.reserve(s.size()*3);
     for(int v:s){ k+=std::to_string(v); k+=','; }
     return k;
 }
 
-// ============================================================
-//  RESOLVER — BFS + DP con memoizacion
-//  Retorna la secuencia optima de jugadas, o vector vacío si no hay solución
-// ============================================================
 inline std::vector<Jugada> resolver(const Senda& inicial, int maxRondas=50) {
     std::unordered_set<std::string> visitados;
     std::queue<NodoBFS> cola;

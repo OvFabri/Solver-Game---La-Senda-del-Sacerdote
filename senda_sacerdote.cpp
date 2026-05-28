@@ -1,8 +1,3 @@
-// ============================================================
-//  senda_sacerdote.cpp — La Senda del Sacerdote
-//  Juego interactivo en consola
-//  Comando 's' durante tu turno activa el solver automatico
-// ============================================================
 #include "logica.h"
 #include <iostream>
 #include <sstream>
@@ -10,9 +5,6 @@
 #include <chrono>
 #include <thread>
 
-// ============================================================
-//  IMPRIMIR SENDA VERTICAL (para el juego interactivo)
-// ============================================================
 void imprimirSendaV(const Senda& s) {
     std::cout << "\n" << C_NEGRITA
               << "══════════════════════════════════════════════════════\n"
@@ -46,9 +38,6 @@ void imprimirHabilidades(){
     std::cout<<" 14  Cuerpo Astral: Intercambia con carta exactamente a 4 espacios\n\n";
 }
 
-// ============================================================
-//  EJECUTAR SOLVER Y ANIMAR LA SOLUCION PASO A PASO
-// ============================================================
 void ejecutarSolver(Senda senda) {
     std::cout<<C_AMARILLO<<C_NEGRITA
              <<"\n[SOLVER] Buscando solucion optima...\n"<<C_RESET;
@@ -71,7 +60,6 @@ void ejecutarSolver(Senda senda) {
 
         std::cout<<C_NEGRITA<<"\nRonda "<<(i+1)<<"/"<<solucion.size()<<":\n"<<C_RESET;
 
-        // Aplicar movimiento del jugador
         for(auto& [ns, jj] : generarMovimientos(actual)){
             if(jj.descripcion==j.descripcion){ actual=ns; break; }
         }
@@ -80,7 +68,6 @@ void ejecutarSolver(Senda senda) {
         std::cout<<"  Tras jugador:\n";
         imprimirSendaH(actual);
 
-        // Simular falsos maestros con mensajes
         std::cout<<"  "<<C_FALSO<<"Falsos Maestros actuan..."<<C_RESET<<"\n";
         actual = simularFalsosMaestros(actual);
         std::cout<<"  Tras F.Maestros:\n";
@@ -97,9 +84,6 @@ void ejecutarSolver(Senda senda) {
              <<solucion.size()<<" ronda(s).\n"<<C_RESET;
 }
 
-// ============================================================
-//  TURNO DEL JUGADOR
-// ============================================================
 bool turnoJugador(Senda& senda, int ronda) {
     int n=(int)senda.size();
     std::cout<<C_MAESTRO<<C_NEGRITA<<"── Tu turno (Ronda "<<ronda<<") ──\n"<<C_RESET;
@@ -125,7 +109,7 @@ bool turnoJugador(Senda& senda, int ronda) {
     if(entrada=="h"||entrada=="H"){ imprimirHabilidades(); return turnoJugador(senda,ronda); }
     if(entrada=="s"||entrada=="S"){
         ejecutarSolver(senda);
-        return false; // el solver tomo el control, terminar modo manual
+        return false; 
     }
 
     int posM;
@@ -217,9 +201,6 @@ bool turnoJugador(Senda& senda, int ronda) {
     return true;
 }
 
-// ============================================================
-//  TURNO FALSOS MAESTROS (con mensajes)
-// ============================================================
 void turnoFalsosMaestros(Senda& senda) {
     std::cout<<C_FALSO<<C_NEGRITA<<"── Turno de Falsos Maestros ──\n"<<C_RESET;
     for(int fm:{1,2,3,4,6,11}){
@@ -275,9 +256,7 @@ void turnoFalsosMaestros(Senda& senda) {
     }
 }
 
-// ============================================================
-//  INICIALIZAR JUEGO
-// ============================================================
+
 Senda iniciarJuego(){
     std::vector<int> vals={1,2,3,4,5,6,7,8,9,10,11,12,13,14};
     unsigned seed=std::chrono::system_clock::now().time_since_epoch().count();
@@ -289,14 +268,11 @@ Senda iniciarJuego(){
     return s;
 }
 
-// ============================================================
-//  MAIN
-// ============================================================
 int main(){
     std::cout<<C_MAESTRO<<C_NEGRITA;
     std::cout<<"╔══════════════════════════════════════════════╗\n";
     std::cout<<"║        LA SENDA DEL SACERDOTE                ║\n";
-    std::cout<<"║        Un juego de Xibalba                   ║\n";
+    std::cout<<"║                                              ║\n";
     std::cout<<"╚══════════════════════════════════════════════╝\n";
     std::cout<<C_RESET<<"\n";
     std::cout<<"Comandos: numero=seleccionar maestro | h=habilidades | s=solver | q=salir\n\n";

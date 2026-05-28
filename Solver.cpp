@@ -1,21 +1,3 @@
-/*
- * ============================================================
- *  SOLVER — La Senda del Sacerdote
- *  Algoritmo: DP con memoización (BFS sobre espacio de estados)
- *
- *  Idea:
- *    - Un "estado" = el orden de cartas en la senda (vector de valores)
- *    - Representamos cada estado como un string para usarlo como clave
- *      en el mapa de memoización
- *    - BFS garantiza encontrar la solución en el MÍNIMO de rondas
- *    - La memoización evita explorar el mismo estado dos veces
- *
- *  Uso:
- *    Compilar: g++ -std=c++17 -O2 -o solver solver.cpp
- *    Ejecutar: ./solver
- *    Ingresa el orden inicial de las 14 cartas de la senda
- * ============================================================
- */
 
 #include <iostream>
 #include <vector>
@@ -27,15 +9,9 @@
 #include <sstream>
 #include <iomanip>
 
-// ============================================================
-//  CONSTANTES
-// ============================================================
 const int APRENDIZ = 0;
 const int AH_PUCH  = 99;
 
-// ============================================================
-//  ESTADO (solo valores, sin strings — más eficiente para DP)
-// ============================================================
 using Senda = std::vector<int>;  // vector de valores de cartas
 
 // Convierte la senda a string clave para el mapa de memo
@@ -49,9 +25,6 @@ std::string claveEstado(const Senda& s) {
     return k;
 }
 
-// ============================================================
-//  INFO DE CARTAS
-// ============================================================
 bool esMaestro(int v) {
     return v == 5 || v == 7 || v == 8 || v == 9 ||
            v == 10 || v == 12 || v == 13 || v == 14;
@@ -83,9 +56,6 @@ std::string nombreCarta(int v) {
     }
 }
 
-// ============================================================
-//  OPERACIONES SOBRE SENDA
-// ============================================================
 
 bool victoria(const Senda& s) {
     int ia = -1, ip = -1;
@@ -107,7 +77,6 @@ int buscar(const Senda& s, int val) {
     return -1;
 }
 
-// Mover carta de 'desde' a 'destino' (con clamp)
 Senda moverCarta(Senda s, int desde, int destino) {
     int n = (int)s.size();
     if (destino < 0) destino = 0;
@@ -130,7 +99,6 @@ Senda destruirCarta(Senda s, int idx) {
     return s;
 }
 
-// Adyacente de menor valor (Ah Puch es inmune, Aprendiz=0 es válido)
 int adyMenorValor(const Senda& s, int pos) {
     int n = (int)s.size();
     int mejor = -1, menorVal = 9999;
@@ -144,11 +112,6 @@ int adyMenorValor(const Senda& s, int pos) {
     return mejor;
 }
 
-// ============================================================
-//  SIMULAR TURNO FALSOS MAESTROS
-//  Devuelve el nuevo estado tras activar todos los F.Maestros
-//  Devuelve {} (vacío) si el Aprendiz fue destruido (derrota)
-// ============================================================
 Senda simularFalsosMaestros(Senda s) {
     std::vector<int> orden = {1, 2, 3, 4, 6, 11};
 
@@ -221,30 +184,21 @@ Senda simularFalsosMaestros(Senda s) {
     return s;
 }
 
-// ============================================================
-//  DESCRIPCIÓN DE UNA JUGADA (para mostrar la solución)
-// ============================================================
 struct Jugada {
-    int  maestro;       // valor del maestro activado
-    int  posMaestro;    // posición en la senda
-    int  opcion;        // 1 o 2 (para maestros con dos opciones)
-    int  target;        // posición objetivo
-    char dir;           // '+' o '-' para movimientos direccionales
+    int  maestro;       
+    int  posMaestro;    
+    int  opcion;        
+    int  target;        
+    char dir;           
     std::string descripcion;
 };
 
-// ============================================================
-//  NODO DEL BFS
-// ============================================================
+
 struct Nodo {
     Senda senda;
     std::vector<Jugada> camino; // jugadas hechas hasta llegar aquí
 };
 
-// ============================================================
-//  GENERAR TODOS LOS ESTADOS POSIBLES TRAS ACTIVAR UN MAESTRO
-//  Devuelve pares (senda_resultante, jugada_aplicada)
-// ============================================================
 std::vector<std::pair<Senda, Jugada>> generarMovimientos(const Senda& s) {
     std::vector<std::pair<Senda, Jugada>> resultados;
     int n = (int)s.size();
@@ -253,7 +207,7 @@ std::vector<std::pair<Senda, Jugada>> generarMovimientos(const Senda& s) {
         int val = s[pos];
         if (!esMaestro(val)) continue;
 
-        if (val == 5) { // EJERCICIO: intercambia con carta a dist 1 o 2
+        if (val == 5) { // EJERCICIO
             for (int dist : {1, 2}) {
                 for (int dir : {-1, 1}) {
                     int t = pos + dist * dir;
@@ -269,9 +223,9 @@ std::vector<std::pair<Senda, Jugada>> generarMovimientos(const Senda& s) {
                 }
             }
         }
-        else if (val == 7) { // FILOSOFIA: dist3→mueve1, dist2→mueve2, dist1→mueve3
+        else if (val == 7) { // FILOSOFIA
             for (int dist : {1, 2, 3}) {
-                int movimiento = 4 - dist; // dist1=3, dist2=2, dist3=1
+                int movimiento = 4 - dist; 
                 for (int ddir : {-1, 1}) {
                     int t = pos + dist * ddir;
                     if (t < 0 || t >= n) continue;
@@ -316,7 +270,7 @@ std::vector<std::pair<Senda, Jugada>> generarMovimientos(const Senda& s) {
                 }
             }
         }
-        else if (val == 9) { // MEDITACION: intercambia con carta exactamente a 3
+        else if (val == 9) { // MEDITACION:
             for (int ddir : {-1, 1}) {
                 int t = pos + 3 * ddir;
                 if (t < 0 || t >= n) continue;
@@ -330,7 +284,7 @@ std::vector<std::pair<Senda, Jugada>> generarMovimientos(const Senda& s) {
                 resultados.push_back({ns, j});
             }
         }
-        else if (val == 10) { // ORACION: intercambia con adyacente
+        else if (val == 10) { // ORACION:
             for (int ddir : {-1, 1}) {
                 int t = pos + ddir;
                 if (t < 0 || t >= n) continue;
@@ -344,7 +298,7 @@ std::vector<std::pair<Senda, Jugada>> generarMovimientos(const Senda& s) {
                 resultados.push_back({ns, j});
             }
         }
-        else if (val == 12) { // PEREGRINO: mueve adyacente exactamente 2
+        else if (val == 12) { // PEREGRINO:
             for (int ddir : {-1, 1}) {
                 int t = pos + ddir;
                 if (t < 0 || t >= n) continue;
@@ -386,7 +340,7 @@ std::vector<std::pair<Senda, Jugada>> generarMovimientos(const Senda& s) {
                 }
             }
         }
-        else if (val == 14) { // CUERPO ASTRAL: intercambia con carta exactamente a 4
+        else if (val == 14) { // CUERPO ASTRAL:
             for (int ddir : {-1, 1}) {
                 int t = pos + 4 * ddir;
                 if (t < 0 || t >= n) continue;
@@ -404,9 +358,6 @@ std::vector<std::pair<Senda, Jugada>> generarMovimientos(const Senda& s) {
     return resultados;
 }
 
-// ============================================================
-//  IMPRIMIR SENDA
-// ============================================================
 void imprimirSenda(const Senda& s) {
     std::cout << "  [";
     for (int i = 0; i < (int)s.size(); i++) {
@@ -421,9 +372,6 @@ void imprimirSenda(const Senda& s) {
     std::cout << "]\n";
 }
 
-// ============================================================
-//  SOLVER PRINCIPAL — BFS + MEMOIZACIÓN
-// ============================================================
 std::vector<Jugada> resolver(const Senda& inicial, int maxRondas = 50) {
     std::unordered_set<std::string> visitados;
     std::queue<Nodo> cola;
@@ -440,23 +388,15 @@ std::vector<Jugada> resolver(const Senda& inicial, int maxRondas = 50) {
 
         if ((int)actual.camino.size() >= maxRondas) continue;
 
-        // Generar todos los movimientos posibles del jugador
         auto movimientos = generarMovimientos(actual.senda);
 
         for (auto& [sendaTrasJugador, jugada] : movimientos) {
 
-            // Verificar victoria inmediata tras el movimiento del jugador
-            // (antes de que jueguen los F.Maestros)
-            // Según reglas: los F.Maestros SIEMPRE juegan después
-            // así que simulamos su turno igual
-
-            // Simular turno de Falsos Maestros
             Senda sendaFinal = simularFalsosMaestros(sendaTrasJugador);
 
             // Derrota: Aprendiz destruido
             if (sendaFinal.empty()) continue;
 
-            // Construir camino con esta jugada
             std::vector<Jugada> nuevoCamino = actual.camino;
             nuevoCamino.push_back(jugada);
 
@@ -469,7 +409,7 @@ std::vector<Jugada> resolver(const Senda& inicial, int maxRondas = 50) {
                 return nuevoCamino;
             }
 
-            // Memoizacion: si este estado ya fue visitado, saltarlo
+            // Si este estado ya fue visitado, saltarlo
             std::string clave = claveEstado(sendaFinal);
             if (visitados.count(clave)) continue;
             visitados.insert(clave);
@@ -483,9 +423,6 @@ std::vector<Jugada> resolver(const Senda& inicial, int maxRondas = 50) {
     return {};
 }
 
-// ============================================================
-//  MAIN
-// ============================================================
 int main() {
     std::cout << "\033[1m";
     std::cout << "╔══════════════════════════════════════════════╗\n";
@@ -513,7 +450,7 @@ int main() {
         return 1;
     }
 
-    // Construir senda completa: [Aprendiz] + [14 cartas] + [AhPuch]
+
     Senda senda;
     senda.push_back(APRENDIZ);
     for (int c : cartas) senda.push_back(c);
@@ -530,7 +467,6 @@ int main() {
         return 0;
     }
 
-    // Mostrar la solucion paso a paso
     std::cout << "\n\033[1m══ SOLUCION OPTIMA ══\033[0m\n\n";
 
     Senda actual = senda;
@@ -539,9 +475,8 @@ int main() {
         std::cout << "\033[1mRonda " << (i+1) << ":\033[0m\n";
         std::cout << "  \033[32mJugador activa: " << j.descripcion << "\033[0m\n";
 
-        // Aplicar el movimiento del jugador
         auto movs = generarMovimientos(actual);
-        // Buscar el movimiento que coincide con la descripcion
+
         for (auto& [ns, jj] : movs) {
             if (jj.descripcion == j.descripcion) {
                 actual = ns;
@@ -552,7 +487,6 @@ int main() {
         std::cout << "  Tras jugador:   ";
         imprimirSenda(actual);
 
-        // Simular falsos maestros
         actual = simularFalsosMaestros(actual);
         std::cout << "  Tras F.Maestros:";
         imprimirSenda(actual);
